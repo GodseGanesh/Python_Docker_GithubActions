@@ -1,0 +1,33 @@
+name: Python HTTP Server CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Run HTTP Server in Background
+      run: |
+        nohup python main.py &
+        sleep 3  # Give server time to start
+
+    - name: Test Home Route
+      run: |
+        curl --fail http://localhost:8000/ | grep "Welcome to the Home Page"
+
+    - name: Test Health Route
+      run: |
+        curl --fail http://localhost:8000/health | grep "Server is Healthy"
